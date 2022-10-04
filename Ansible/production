@@ -1,0 +1,11 @@
+[microk8s]
+node1 ansible_host=localhost ansible_port=2222 ansible_ssh_private_key_file=$HOME/.ssh/id_ed25519
+node2 ansible_host=localhost ansible_port=2200 ansible_ssh_private_key_file=$HOME/.ssh/id_ed25519
+
+[microk8s-master]
+node1 ansible_host=localhost ansible_port=2222 ansible_ssh_private_key_file=$HOME/.ssh/id_ed25519
+
+[microk8s-worker1]
+node2 ansible_host=localhost ansible_port=2200 ansible_ssh_private_key_file=$HOME/.ssh/id_ed25519
+
+

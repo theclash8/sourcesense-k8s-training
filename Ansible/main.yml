@@ -1,0 +1,31 @@
+- hosts: microk8s
+  become: yes
+  roles:
+    - role: microk8s_role
+  tasks:
+
+  # FIX FOR VIRTUALBOX NAT INTERFACE
+  - name: update microk8s ip
+    shell: echo --node-ip=$(ip address show dev eth1 | grep 'inet ' | awk -F ' ' '{print $2}' | sed -e "s/\/24//g") >> /var/snap/microk8s/current/args/kubelet; /snap/bin/microk8s stop; /snap/bin/microk8s start
+
+- hosts: microk8s-master
+  become: true
+  tasks:
+  - name: Create join key
+    shell: /snap/bin/microk8s add-node
+    register: join_cluster
+
+  - name: Create persistent var
+    set_fact:
+      join: "{{ join_cluster.stdout_lines[-1] }}"
+
+  - name: Debug -> join var
+    debug:
+      var: join
+
+- hosts: microk8s-worker1
+  become: true
+  tasks:
+
+  - name: Join cluster
+    shell: "/snap/bin/{{ hostvars['node1']['join'] }}"

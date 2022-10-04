@@ -1,0 +1,9 @@
+# Source: mychart/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: this-is-a-configmap
+data:
+  configmap.toml: |-
+        message = Hello, I am a configmap!
+

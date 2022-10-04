@@ -1,0 +1,5 @@
+ingress:
+  enabled: true
+global:
+  storageClass: nfs-client
+  size: 3Gi
