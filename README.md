@@ -1,4 +1,5 @@
 **Basic**
+
 [X] Preparazione di due VMs Vagrant (comunicazione su rete interna della vostra workstation) o su Hypervisor KVM o su qualche cloud provider.
 
 Usato Vagrantfile per deploy 2 debian bullseye 2 schede di rete per comunicazione.
