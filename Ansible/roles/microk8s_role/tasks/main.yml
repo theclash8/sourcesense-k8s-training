@@ -1,0 +1,77 @@
+---
+- name: Install required packages
+  package:
+    name:
+    - iptables
+    - conntrack
+    - snapd
+    state: present
+    update_cache: yes
+
+- name: Install required snaps
+  snap:
+    classic: yes
+    name: 
+    - microk8s
+    - helm
+
+- name: Add admin user to microk8s group
+  user:
+    name: "{{admin_user}}"
+    groups: microk8s
+    append: yes
+
+- name: Create kubectl alias
+  command: snap alias microk8s.kubectl kc
+
+- name: Enable kubectl autocompletion
+  lineinfile:
+    path: "/home/{{admin_user}}/.zshrc"
+    line: source <(microk8s.kubectl completion zsh | sed "s/kubectl/kc/g")
+    create: yes
+
+- name: Enable microk8s services
+  command: "/snap/bin/microk8s enable {{item}}"
+  with_items:
+  - dns
+  - storage
+  - ingress
+  - host-access
+  - registry
+
+- name: Make iptables changes persistent
+  apt:
+    name: "{{packages}}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - iptables-persistent
+
+- name: Make sure pods have access to internet
+  iptables:
+    chain: FORWARD
+    policy: ACCEPT
+
+- name: Create kube config folder
+  file:
+    path: "/home/{{admin_user}}/.kube"
+    state: directory
+    owner: "{{admin_user}}"
+    group: "{{admin_user}}"
+
+- name: Generate kubeconfig
+  shell: "/snap/bin/microk8s config > /home/{{admin_user}}/.kube/config"
+
+- name: Make kube config not world-readable
+  file:
+    path: "/home/{{admin_user}}/.kube/config"
+    mode: 0600
+    owner: "{{admin_user}}"
+    group: "{{admin_user}}"
+
+- name: Copy kubectl file to local
+  ansible.builtin.fetch:
+    src: "/home/{{ admin_user }}/.kube/config"
+    dest: "/home/luca/.kube/config-{{ inventory_hostname }}"
+    flat: yes
